@@ -1,3 +1,5 @@
+-- Main schema file for MediTrack application
+
 -- Create database and set it as current database
 DROP DATABASE IF EXISTS meditrack;
 CREATE DATABASE meditrack;
