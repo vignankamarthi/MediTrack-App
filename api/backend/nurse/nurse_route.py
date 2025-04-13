@@ -380,5 +380,70 @@ def assign_care_pathway_to_patient():
 
 #--------------------[Nurse User Persona ~ Maria #6 ]----------------------
 
-## NEED TO COMPLETE
 
+
+# get the patient social determinant records
+@nurse.route('/patient-social-records/<patient_id>/determinant', methods=['GET'])
+def get_patient_social_determinant_records(patient_id):
+    cursor = db.get_db().cursor()
+    cursor.execute('''SELECT sd.determinant_id, sd.determinant_name, sd.category, psr.impact_level
+                   FROM patient_social_record psr 
+                   JOIN SOCIAL_DETERMINANTS sd ON sd.determinant_id = psr.determinant_id
+                   WHERE psr.patuent = {0}
+    ''').format(patient_id)
+    
+    theData = cursor.fetchall()
+    
+    the_response = make_response(jsonify(theData))
+    the_response.status_code = 200
+    return the_response
+
+# add social determinant to the patient's record
+@nurse.route('/patient-social-records/<patient_id>/determinant', methods=['POST'])
+def assign_care_pathway_to_patient():
+    cursor = db.get_db().cursor()
+    data = request.get_json()
+
+    determinant_id = data.get('determinant_id')
+    impact_level = data.get('impact_level')
+
+    if not (impact_level and determinant_id):
+        return make_response(jsonify({"error": "There input is not invalid and all variables are required"}), 400)
+    
+    mysql_query = '''
+        INSERT INTO patient_pathway_record (
+            determinant_id, 
+            impact_level,
+        ) VALUES (%s, %s)
+    '''
+    cursor.execute(mysql_query, (determinant_id, impact_level))
+    
+    db.get_db().commit()
+    
+    the_response = make_response(jsonify({"message": "Social Determinant was Created & Assigned to Patient's Record"}))
+    the_response.status_code = 201
+    return the_response
+
+# update a patient's social determinant impact level
+@nurse.route('/patient-social-records/<patient_id>/determinant/<determinant_id>', methods=['PUT'])
+def update_pat_social_determ_impact_level(patient_id, determinant_id):
+    cursor = db.get_db().cursor()
+    data = request.get_json()
+    impact_level = data.get('impact_level')
+
+    if not determinant_id:
+        return make_response(jsonify({"error": "There is no valid determinant assigned to the patient"}), 400)
+    
+
+    mysql_query = '''
+        UPDATE LAB_RESULTS
+        SET impact_level = %s
+        WHERE patient_id = %s AND determinant_id=%s
+    '''
+    cursor.execute(mysql_query, (impact_level, patient_id, determinant_id))
+    
+    db.get_db().commit()
+    
+    the_response = make_response(jsonify({"message": "Update to the Social Determinant Impact Level was Updated"}))
+    the_response.status_code = 200
+    return the_response

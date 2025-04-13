@@ -1,139 +1,102 @@
 import streamlit as st
+import requests
+import pandas as pd
 
-# Inject CSS styles with wider layout
-st.markdown("""
-<style>
-/* Expand the main content area */
-.main .block-container {
-  max-width: 1400px;
-  padding-left: 2rem;
-  padding-right: 2rem;
-}
+API_BASE = "http://localhost:3006/nurse"  # Adjust this to match your actual Flask URL
+st.set_page_config(layout="wide")
+st.title("👩‍⚕️ Nurse Dashboard")
 
-.dashboard-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-}
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid #e0e4e8;
-  margin-bottom: 20px;
-}
-.dashboard-header h1 {
-  font-size: 28px;
-  margin: 0;
-}
+# ------------------ Care Tasks ------------------
+st.header("📋 Care Tasks")
 
-.dashboard-header h2 {
-  font-size: 20px;
-  margin: 0;
-}
+with st.expander("➕ Create New Task"):
+    with st.form("create_task"):
+        task_name = st.text_input("Task Name")
+        description = st.text_area("Description")
+        priority = st.selectbox("Priority", [1, 2, 3])
+        estimated_duration = st.number_input("Estimated Duration (mins)", min_value=0)
+        if st.form_submit_button("Submit"):
+            res = requests.post(f"{API_BASE}/care-tasks/", json={
+                "task_name": task_name,
+                "description": description,
+                "priority": priority,
+                "esimated_duration": estimated_duration
+            })
+            st.success("Task created" if res.ok else res.text)
 
-.dashboard-header h3 {
-  font-size: 14px;
-  margin: 0;
-}
-           
-            
-.logo {
-  font-size: 22px;
-  font-weight: bold;
-  color: #2c7be5;
-}
-            
-.user-info {
-  display: flex;
-  align-items: center;
-}
-.user-name {
-  margin-right: 10px;
-  font-weight: 500;
-}
-.avatar {
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-}
-.metric-card, .chart-container, .performance-indicators {
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  margin-bottom: 20px;
-}
-.metric-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #12263f;
-}
-.metric-trend.positive { color: #00d97e; }
-.metric-trend.negative { color: #e63757; }
-.status-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
-.status-indicator.success { background-color: #00d97e; }
-.status-indicator.warning { background-color: #f6c343; }
-</style>
-""", unsafe_allow_html=True)
+care_tasks = requests.get(f"{API_BASE}/care-tasks").json()
+st.dataframe(pd.DataFrame(care_tasks))
 
-# Header
-st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
+# ------------------ Patient Symptom Records ------------------
+st.header("🩺 Patient Symptom Records")
+symptoms = requests.get(f"{API_BASE}/patient-symptom-records").json()
+st.dataframe(pd.DataFrame(symptoms))
 
-st.markdown('''
-<div class="dashboard-header">
-  <div class="logo">MediTrack</div>
-  <h1>Population Health Dashboard</h1>
-  <div class="user-info">
-    <span class="user-name">Dr. James Wilson</span>
-    <img src="https://as2.ftcdn.net/v2/jpg/03/20/52/31/1000_F_320523164_tx7Rdd7I2XDTvvKfz2oRuRpKOPE5z0ni.jpg" class="avatar">
-  </div>
-</div>
-''', unsafe_allow_html=True)
+with st.expander("➕ Add New Symptom Record"):
+    with st.form("add_symptom"):
+        patient_id = st.text_input("Patient ID")
+        symptom_id = st.text_input("Symptom ID")
+        severity_id = st.text_input("Severity ID")
+        if st.form_submit_button("Submit"):
+            res = requests.post(f"{API_BASE}/patient-symptom-records", json={
+                "patient_id": patient_id,
+                "symptom_id": symptom_id,
+                "severity_id": severity_id
+            })
+            st.success("Symptom recorded" if res.ok else res.text)
 
-# Controls
-st.text_input("Search patients or conditions...")
-col1, col2, col3, col4 = st.columns(4)
-col1.selectbox("Condition", ["All Conditions", "Diabetes", "Hypertension", "COPD", "CHF"])
-col2.selectbox("Age Group", ["All Ages", "18-30", "31-45", "46-60", "61+"])
-col3.selectbox("Gender", ["All Genders", "Male", "Female", "Other"])
-col4.selectbox("Time Period", ["Last 3 Months", "Last 6 Months", "Last Year", "Custom..."])
-st.button("Apply Filters")
+# ------------------ Lab Results ------------------
+st.header("🧪 Lab Results")
+lab_patient_id = st.text_input("Enter patient ID to fetch lab results")
+if lab_patient_id:
+    res = requests.get(f"{API_BASE}/lab-results", params={"patient_id": lab_patient_id})
+    if res.ok:
+        st.dataframe(pd.DataFrame(res.json()))
+    else:
+        st.error(res.text)
 
-# Metrics
-st.markdown("### Metrics Overview")
-metric_cols = st.columns(4)
-metric_cols[0].markdown("""<div class='metric-card'><h4>Total Patients</h3><p class='metric-value'>2,487</p><p class='metric-trend positive'>+5.2% from last period</p></div>""", unsafe_allow_html=True)
-metric_cols[1].markdown("""<div class='metric-card'><h4>Avg. Treatment Success</h3><p class='metric-value'>76%</p><p class='metric-trend positive'>+3.8% from last period</p></div>""", unsafe_allow_html=True)
-metric_cols[2].markdown("""<div class='metric-card'><h4>Readmission Rate</h3><p class='metric-value'>8.7%</p><p class='metric-trend negative'>+1.2% from last period</p></div>""", unsafe_allow_html=True)
-metric_cols[3].markdown("""<div class='metric-card'><h4>Medication Adherence</h3><p class='metric-value'>82%</p><p class='metric-trend positive'>+2.5% from last period</p></div>""", unsafe_allow_html=True)
+# ------------------ Medication Administration ------------------
+st.header("💊 Medication Administration Records")
+meds = requests.get(f"{API_BASE}/medication-administration").json()
+st.dataframe(pd.DataFrame(meds))
 
-# Placeholder Charts
-st.markdown("### Treatment Outcomes by Condition")
-st.empty()
+with st.expander("➕ Add Medication Admin Record"):
+    with st.form("add_admin"):
+        med_id = st.text_input("Medication ID")
+        result_id = st.text_input("Result ID")
+        administered_date = st.date_input("Administered Date")
+        if st.form_submit_button("Submit"):
+            res = requests.post(f"{API_BASE}/medication-administration", json={
+                "medication_id": med_id,
+                "result_id": result_id,
+                "administered_date": str(administered_date)
+            })
+            st.success("Admin record added" if res.ok else res.text)
 
-st.markdown("### Demographic Breakdown vs Timeline Comparison")
-chart_row = st.columns(2)
-chart_row[0].empty()
-chart_row[1].empty()
+# ------------------ Care Pathways ------------------
+st.header("🧭 Care Pathways")
+paths = requests.get(f"{API_BASE}/care-pathways").json()
+st.dataframe(pd.DataFrame(paths))
 
-# KPI Table
-st.markdown("""
-<div class="performance-indicators">
-<h3>Key Performance Indicators</h3>
-<table class="kpi-table">
-<thead><tr><th>Metric</th><th>Current</th><th>Target</th><th>Status</th></tr></thead>
-<tbody>
-<tr><td>HbA1c Control (Diabetes)</td><td>68%</td><td>75%</td><td><span class="status-indicator warning"></span> Below Target</td></tr>
-<tr><td>BP Control (Hypertension)</td><td>72%</td><td>70%</td><td><span class="status-indicator success"></span> Above Target</td></tr>
-<tr><td>Preventative Screenings</td><td>81%</td><td>85%</td><td><span class="status-indicator warning"></span> Below Target</td></tr>
-<tr><td>Follow-up Compliance</td><td>88%</td><td>80%</td><td><span class="status-indicator success"></span> Above Target</td></tr>
-</tbody>
-</table>
-</div>
-""", unsafe_allow_html=True)
+# ------------------ Social Determinants ------------------
+st.header("🌍 Social Determinants")
+with st.form("view_social"):
+    patient_social_id = st.text_input("Patient ID for Social Determinants")
+    if st.form_submit_button("Fetch"):
+        res = requests.get(f"{API_BASE}/patient-social-records/{patient_social_id}/determinant")
+        if res.ok:
+            st.dataframe(pd.DataFrame(res.json()))
+        else:
+            st.error(res.text)
 
-st.markdown('</div>', unsafe_allow_html=True)
-
+with st.expander("➕ Assign Social Determinant"):
+    with st.form("assign_social"):
+        patient_id = st.text_input("Patient ID")
+        determinant_id = st.text_input("Determinant ID")
+        impact_level = st.text_input("Impact Level")
+        if st.form_submit_button("Submit"):
+            res = requests.post(f"{API_BASE}/patient-social-records/{patient_id}/determinant", json={
+                "determinant_id": determinant_id,
+                "impact_level": impact_level
+            })
+            st.success("Social determinant assigned" if res.ok else res.text)
