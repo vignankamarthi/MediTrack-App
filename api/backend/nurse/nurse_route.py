@@ -84,7 +84,7 @@ def get_specific_caretask(task_id):
 
 # update a specific care task description
 @nurse.route('/care-tasks/{task_id}/description', methods=['PUT'])
-def update_specific_caretask(task_id):
+def update_known_caretask(task_id):
 
     data = request.get_json()
     new_description = data.get('description')
@@ -307,18 +307,18 @@ def create_new_care_pathways():
     data = request.get_json()
 
     patient_id = data.get('patient_id')
-    result_id = data.get('result_id')
+    pathway_id = data.get('pathway_id')
 
-    if not (result_id and patient_id):
+    if not (pathway_id and patient_id):
         return make_response(jsonify({"error": "There input is not invalid and all variables are required"}), 400)
     
     mysql_query = '''
         INSERT INTO patient_pathway_record (
             patient_id, 
-            result_id,
+            pathway_id,
         ) VALUES (%s, %s)
     '''
-    cursor.execute(mysql_query, (patient_id, result_id))
+    cursor.execute(mysql_query, (patient_id, pathway_id))
     
     db.get_db().commit()
     
@@ -329,7 +329,7 @@ def create_new_care_pathways():
 
 # produce patient care pathway assignments 
 @nurse.route('/patient-pathway-records', methods=['GET'])
-def update_specific_caretask():
+def get_patient_care_pathway():
     cursor = db.get_db().cursor()
     cursor.execute('''SELECT patPR.patient_id, 
                    p.first_name, p.last_name, 
@@ -400,7 +400,7 @@ def get_patient_social_determinant_records(patient_id):
 
 # add social determinant to the patient's record
 @nurse.route('/patient-social-records/<patient_id>/determinant', methods=['POST'])
-def assign_care_pathway_to_patient():
+def assign_social_determinant_to_patient():
     cursor = db.get_db().cursor()
     data = request.get_json()
 
