@@ -164,7 +164,7 @@ def update_known_clinical_protocol():
     is_active = data.get('is_active', True)
 
     insert_sql_query = '''
-        INSERT INTO CLINCIAL_PROTOCOL (
+        INSERT INTO CLINICAL_PROTOCOL (
             protocol_name, 
             description,
             version, 
@@ -191,7 +191,7 @@ def get_protocol_details(protocol_id):
     cursor = db.get_db().cursor()
     cursor.execute('''SELECT protocol_id, protocol_name, description, version, effective_date, expiration_date,
                    is_active, created_at, updated_at
-                   FROM CLINCIAL_PROTOCOL
+                   FROM CLINICAL_PROTOCOL
                    WHERE protocol_id {0}
     ''').format(protocol_id)
     

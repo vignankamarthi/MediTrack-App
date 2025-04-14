@@ -94,7 +94,7 @@ def update_known_caretask(task_id):
     '''
 
     cursor = db.get_db().cursor()
-    cursor.execute(mysql_query, ((new_description), task_id))
+    cursor.execute(mysql_query, (new_description, task_id))
     
 
     the_response = make_response(jsonify({"message": "Care Task Description was Updated"}))
