@@ -6,7 +6,7 @@ from flask import request
 from flask import jsonify
 from flask import make_response
 from flask import current_app
-from backend.db_connection import db
+from db_connection import db
 
 # ------------------------------------------------------------
 # Create a new Blueprint object, which is a collection of
@@ -117,7 +117,7 @@ def get_patient_symptoms():
                    FROM patient_symptom_record patSR
                    JOIN PATIENT p ON patSR.patient_id = p.patient_id
                    JOIN SYMPTOMS s ON patSR.symptom_id = s.symptom_id
-                   ORDER BY patSR.last_name, patSR.last_name, patSR.first_name         
+                   ORDER BY p.last_name, p.first_name         
     ''')
     
     theData = cursor.fetchall()
