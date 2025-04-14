@@ -30,3 +30,28 @@ def get_care_tasks():
     the_response = make_response(jsonify(theData))
     the_response.status_code = 200
     return the_response
+
+# ------------------------------------------------------------
+# Add a new patient symptom entry
+@nurses.route("/patient-symptoms", methods=["POST"])
+def add_patient_symptom():
+    current_app.logger.info("POST /patient-symptoms route")
+
+    data = request.get_json()
+
+    patient_id = data.get("patient_id")
+    symptom_description = data.get("description")
+    observed_time = data.get("timestamp")
+
+    cursor = db.get_db().cursor()
+    query = """
+        INSERT INTO PATIENT_SYMPTOMS (patient_id, description, observed_time)
+        VALUES (%s, %s, %s)
+    """
+    cursor.execute(query, (patient_id, symptom_description, observed_time))
+    db.get_db().commit()
+
+    the_response = make_response(jsonify({"message": "Symptom added"}))
+    the_response.status_code = 201
+    return the_response
+
