@@ -52,7 +52,7 @@ def get_list_medical_conditions():
     return the_response
 
 
-# Return specific side effects and condition details that pertain to a certain treatment beiing used
+# Return specific side effects and condition details that pertain to a certain treatment being used
 @physicians.route('/condition-treatment-protocol/<condition_id>', methods=['GET'])
 def get_known_side_effects_from_treatment(condition_id):
     cursor = db.get_db().cursor()
@@ -82,7 +82,7 @@ def get_known_side_effects_from_treatment(condition_id):
 def get_medication_records(patient_id):
     cursor = db.get_db().cursor()
     cursor.execute('''SELECT med.medication_name, med.generic_name, med.dosage_form, med.strength, 
-                   medRecord.dosage, medRecord.frequency, audLog.log_id, audLog.action_type, audLog.table_affected, audLog.details, audLog.ip_address, audLog_action_timestamp, 
+                   medRecord.dosage, medRecord.frequency, audLog.log_id, audLog.action_type, audLog.table_affected, audLog.details, audLog.ip_address, audLog_action_timestamp
                    FROM medication_record AS medRecord
                    JOIN MEDICATIONS med ON medRecord.medication_id = med.medication_id
                    LEFT JOIN audit_patient_record patRec ON medRecord.patient_id = patRec.patient_id
@@ -138,7 +138,7 @@ def get_healthcare_provider_performance_metrics():
 @physicians.route('/clinical-protocols', methods=['GET'])
 def get_all_clinical_protocols():
     cursor = db.get_db().cursor()
-    cursor.execute('''SELECT protocol_id, protocol_name, description, version, effective_date
+    cursor.execute('''SELECT protocol_id, protocol_name, description, version, effective_date,
                    expiration_date, is_active, created_at, updated_at
                    FROM CLINICAL_PROTOCOL
     ''')
@@ -164,7 +164,7 @@ def update_known_clinical_protocol():
     is_active = data.get('is_active', True)
 
     insert_sql_query = '''
-        INSERT INTO CLINICAL_PROTOCOL (
+        INSERT INTO CLINCIAL_PROTOCOL (
             protocol_name, 
             description,
             version, 
@@ -202,7 +202,7 @@ def get_protocol_details(protocol_id):
     return the_response
 
 # update specific protocol details and status (active/inactive)
-@physicians.route('/clinical-protocols/<protocol_id>', methods=['UPDATE'])
+@physicians.route('/clinical-protocols/<protocol_id>', methods=['PUT'])
 def update_protocol_details():
     data = request.get_json()
     cursor = db.get_db().cursor()
@@ -239,12 +239,12 @@ def update_protocol_details():
 
 # produce all treatment records for re-admission analysis
 @physicians.route('/patient-treatment-records/', methods=['GET'])
-def update_treatment_records():
+def get_treatment_records():
     cursor = db.get_db().cursor()
     cursor.execute('''SELECT ptr.patient_id, p.first_name, p.last_name, t.treatment_name, ptr.startdate, ptr.enddate, ptr.status
-                   FROM patient_treatment_record ptr,
+                   FROM patient_treatment_record ptr
                    JOIN PATIENT p ON ptr.patient_id = p.patient_id
-                   JOIN TREATMENT T ON ptr.treament_id = t.treatment_id
+                   JOIN TREATMENT T ON ptr.treatment_id = t.treatment_id
                    ORDER BY ptr.start_date, ptr.patient_id DESC
     ''')
     
