@@ -31,6 +31,12 @@ def MapDemoNav():
     st.sidebar.page_link("pages/02_Map_Demo.py", label="Map Demonstration", icon="🗺️")
 
 
+def PopulationHealthNav():
+    st.sidebar.page_link(
+        "pages/15_Population_Health.py", label="Population Health", icon="👨‍⚕️"
+    )
+
+
 ## ------------------------ Examples for Role of usaid_worker ------------------------
 def ApiTestNav():
     st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
@@ -91,6 +97,7 @@ def SideBarLinks(show_home=False):
             PolStratAdvHomeNav()
             WorldBankVizNav()
             MapDemoNav()
+            PopulationHealthNav()  # Added the population health dashboard for physicians
 
         # If the user role is usaid worker, show the Api Testing page
         if st.session_state["role"] == "usaid_worker":
