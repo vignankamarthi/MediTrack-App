@@ -58,14 +58,13 @@ def create_new_caretask():
     return make_response(jsonify({"message": "New Care Task was Sucessfully Created"}), 201)
 
 # return the details about a specific care task
-@nurses.route('/care-tasks/{task_id}', methods=['GET'])
+@nurses.route('/care-tasks/<task_id>', methods=['GET'])
 def get_specific_caretask(task_id):
     cursor = db.get_db().cursor()
     cursor.execute('''SELECT task_id, task_name, description, priority, estimated_duration, 
                    created_at, updated_at
                    FROM CARE_TASKS
-                   WHERE task_id = {0}
-    ''').format(task_id)
+                   WHERE task_id = %s''', (task_id,))
     
     theData = cursor.fetchone()
     
@@ -80,7 +79,7 @@ def get_specific_caretask(task_id):
         
 
 # update a specific care task description
-@nurses.route('/care-tasks/{task_id}/description', methods=['PUT'])
+@nurses.route('/care-tasks/<task_id>/description', methods=['PUT'])
 def update_known_caretask(task_id):
 
     data = request.get_json()
@@ -95,7 +94,7 @@ def update_known_caretask(task_id):
     '''
 
     cursor = db.get_db().cursor()
-    cursor.execute(mysql_query, ((new_description), data.get('task_id')))
+    cursor.execute(mysql_query, ((new_description), task_id))
     
 
     the_response = make_response(jsonify({"message": "Care Task Description was Updated"}))
@@ -111,9 +110,9 @@ def update_known_caretask(task_id):
 @nurses.route('/patient-symptom-records', methods=['GET'])
 def get_patient_symptoms():
     cursor = db.get_db().cursor()
-    cursor.execute('''SELECT patSR.patient_id
+    cursor.execute('''SELECT patSR.patient_id,
                    p.first_name, p.last_name,
-                   s.symptom_name, s.description AS sympton_description, 
+                   s.symptom_name, s.description AS symptom_description, 
                    patSR.severity, s.severity_code, s.created_at, s.updated_at
                    FROM patient_symptom_record patSR
                    JOIN PATIENT p ON patSR.patient_id = p.patient_id
@@ -135,7 +134,7 @@ def create_patient_symptom():
     mysql_query = '''INSERT INTO patient_symptom_record (
                    patient_id,
                    symptom_id,
-                   serverity
+                   severity
                    ) VALUES (%s, %s, %s)
     '''
     
@@ -147,8 +146,8 @@ def create_patient_symptom():
     return the_response
 
 # update symptom severity
-@nurses.route('/patient-symptom-records', methods=['UPDATE'])
-def update_symptom_severity(task_id):
+@nurses.route('/patient-symptom-records', methods=['PUT'])
+def update_symptom_severity():
     cursor = db.get_db().cursor()
     data = request.get_json()
     patient_id = data.get('patient_id')
@@ -255,7 +254,7 @@ def create_new_admin_record():
 
     medication_id = data.get('medication_id')
     result_id = data.get('result_id')
-    administered_date = data.get('result_id')
+    administered_date = data.get('administered_date')
 
     if not (result_id and medication_id and administered_date):
         return make_response(jsonify({"error": "There input is not invalid due to all variables needed"}), 400)
@@ -298,7 +297,7 @@ def get_all_care_pathways():
     return the_response
 
 # create new care pathways
-@nurses.route('/patient-pathway-records', methods=['POST'])
+@nurses.route('/care-pathways', methods=['POST'])
 def create_new_care_pathways():
     cursor = db.get_db().cursor()
     data = request.get_json()
@@ -312,7 +311,7 @@ def create_new_care_pathways():
     mysql_query = '''
         INSERT INTO patient_pathway_record (
             patient_id, 
-            pathway_id,
+            pathway_id
         ) VALUES (%s, %s)
     '''
     cursor.execute(mysql_query, (patient_id, pathway_id))
@@ -335,9 +334,9 @@ def get_patient_care_pathway():
                    carePath.description,
                    carePath.standard_duration,
                    carePath.is_active
-                   FROM patient_pathway patPR,
-                   JOIN PATIENT p ON p.patient_id = patPR.patient_id,
-                   JOIN CARE_PATHWAY carePath ON patPR.pathway_id = carePath.pathway_id,
+                   FROM patient_pathway patPR
+                   JOIN PATIENT p ON p.patient_id = patPR.patient_id
+                   JOIN CARE_PATHWAY carePath ON patPR.pathway_id = carePath.pathway_id
                    ORDER BY patPR.patient_id
                    ''')
 
@@ -362,7 +361,7 @@ def assign_care_pathway_to_patient():
     mysql_query = '''
         INSERT INTO patient_pathway_record (
             patient_id, 
-            pathway_id,
+            pathway_id
         ) VALUES (%s, %s)
     '''
     cursor.execute(mysql_query, (patient_id, pathway_id))
@@ -384,10 +383,9 @@ def assign_care_pathway_to_patient():
 def get_patient_social_determinant_records(patient_id):
     cursor = db.get_db().cursor()
     cursor.execute('''SELECT sd.determinant_id, sd.determinant_name, sd.category, psr.impact_level
-                   FROM patient_social_record psr 
-                   JOIN SOCIAL_DETERMINANTS sd ON sd.determinant_id = psr.determinant_id
-                   WHERE psr.patuent = {0}
-    ''').format(patient_id)
+                  FROM patient_social_record psr 
+                  JOIN SOCIAL_DETERMINANTS sd ON sd.determinant_id = psr.determinant_id
+                  WHERE psr.patient_id = %s''', (patient_id,))
     
     theData = cursor.fetchall()
     
@@ -397,10 +395,11 @@ def get_patient_social_determinant_records(patient_id):
 
 # add social determinant to the patient's record
 @nurses.route('/patient-social-records/<patient_id>/determinant', methods=['POST'])
-def assign_social_determinant_to_patient():
+def assign_social_determinant_to_patient(patient_id):
     cursor = db.get_db().cursor()
     data = request.get_json()
 
+    patient_id = data.get('patient_id')
     determinant_id = data.get('determinant_id')
     impact_level = data.get('impact_level')
 
@@ -408,12 +407,13 @@ def assign_social_determinant_to_patient():
         return make_response(jsonify({"error": "There input is not invalid and all variables are required"}), 400)
     
     mysql_query = '''
-        INSERT INTO patient_pathway_record (
+        INSERT INTO patient_social_record (
+            patient_id,
             determinant_id, 
-            impact_level,
-        ) VALUES (%s, %s)
+            impact_level
+        ) VALUES (%s, %s, %s)
     '''
-    cursor.execute(mysql_query, (determinant_id, impact_level))
+    cursor.execute(mysql_query, (patient_id, determinant_id, impact_level))
     
     db.get_db().commit()
     
@@ -433,7 +433,7 @@ def update_pat_social_determ_impact_level(patient_id, determinant_id):
     
 
     mysql_query = '''
-        UPDATE LAB_RESULTS
+        UPDATE patient_social_record
         SET impact_level = %s
         WHERE patient_id = %s AND determinant_id=%s
     '''
