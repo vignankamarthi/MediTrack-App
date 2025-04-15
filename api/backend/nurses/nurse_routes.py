@@ -280,7 +280,7 @@ def create_new_admin_record():
 #--------------------[Nurse User Persona ~ Maria #5 ]----------------------
 
 
-
+# Dante LOPRIORE done this
 # produce all care pathways
 @nurses.route('/care-pathways', methods=['GET'])
 def get_all_care_pathways():
@@ -296,6 +296,7 @@ def get_all_care_pathways():
     the_response.status_code = 200
     return the_response
 
+# Dante LOPRIORE done this
 # create new care pathways
 @nurses.route('/care-pathways', methods=['POST'])
 def create_new_care_pathways():
