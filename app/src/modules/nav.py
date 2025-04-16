@@ -31,6 +31,12 @@ def MapDemoNav():
     st.sidebar.page_link("pages/02_Map_Demo.py", label="Map Demonstration", icon="🗺️")
 
 
+def PopulationHealthNav():
+    st.sidebar.page_link(
+        "pages/15_Population_Health.py", label="Population Health", icon="👨‍⚕️"
+    )
+
+
 ## ------------------------ Examples for Role of usaid_worker ------------------------
 def ApiTestNav():
     st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
@@ -48,11 +54,20 @@ def ClassificationNav():
     )
 
 
+def MedicationReviewNav():
+    st.sidebar.page_link(
+        "pages/14_Medication_Review.py", label="Medication Review", icon="💊"
+    )
+
+
 #### ------------------------ System Admin Role ------------------------
 def AdminPageNav():
     st.sidebar.page_link("pages/20_Admin_Home.py", label="System Admin", icon="🖥️")
     st.sidebar.page_link(
         "pages/21_ML_Model_Mgmt.py", label="ML Model Management", icon="🏢"
+    )
+    st.sidebar.page_link(
+        "pages/22_System_Dashboard.py", label="System Dashboard", icon="📊"
     )
 
 
@@ -82,12 +97,14 @@ def SideBarLinks(show_home=False):
             PolStratAdvHomeNav()
             WorldBankVizNav()
             MapDemoNav()
+            PopulationHealthNav()  # Added the population health dashboard for physicians
 
         # If the user role is usaid worker, show the Api Testing page
         if st.session_state["role"] == "usaid_worker":
             PredictionNav()
             ApiTestNav()
             ClassificationNav()
+            MedicationReviewNav()  # Added the new medication review page
 
         # If the user is an administrator, give them access to the administrator pages
         if st.session_state["role"] == "administrator":
