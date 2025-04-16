@@ -1,138 +1,140 @@
-# lab_viewer_dash_page3.py
 import streamlit as st
 import requests
 from layout_template import render_header
+from datetime import datetime
 
-API_URL = "http://localhost:5000"
-PATIENT_ID = st.session_state.get("current_patient_id", 1)
+API_URL = "http://web-api:4000"
 
 def run():
     render_header()
 
-    st.markdown("## Lab Results Viewer")
+    st.markdown("## 🔬 Lab Results Viewer")
+
+    patient_id = st.session_state.get("current_patient_id")
+    if not patient_id:
+        st.warning("No patient selected. Please select a patient first.")
+        return
 
     try:
-        response = requests.get(f"{API_URL}/lab-results", params={"patient_id": PATIENT_ID})
+        response = requests.get(f"{API_URL}/lab-results", params={"patient_id": patient_id})
         response.raise_for_status()
         lab_results = response.json()
     except Exception as e:
         st.error(f"Error fetching lab results: {e}")
-        lab_results = []
-
-    st.markdown("""
-        <style>
-            .lab-section .card {
-                background: #fff;
-                border-radius: 8px;
-                padding: 1rem;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-                margin-bottom: 2rem;
-            }
-            .card-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 1rem;
-            }
-            .card-title {
-                font-size: 20px;
-                font-weight: bold;
-                color: #003366;
-            }
-            .lab-notification {
-                display: flex;
-                align-items: flex-start;
-                gap: 1rem;
-                border-bottom: 1px solid #eee;
-                padding: 0.75rem 0;
-            }
-            .lab-icon {
-                font-weight: bold;
-                font-size: 20px;
-                color: #dc3545;
-            }
-            .lab-info h4 {
-                margin: 0;
-                font-size: 16px;
-                color: #333;
-            }
-            .lab-info p {
-                margin: 0.2rem 0;
-                font-size: 14px;
-                color: #555;
-            }
-            .lab-table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 14px;
-            }
-            .lab-table th, .lab-table td {
-                padding: 0.5rem 0.75rem;
-                border-bottom: 1px solid #ddd;
-                text-align: left;
-            }
-            .lab-table th {
-                background-color: #f4f6f9;
-                font-weight: 600;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<div class="lab-section">', unsafe_allow_html=True)
-
-    critical = [r for r in lab_results if r.get("is_abnormal")]
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="card-header"><div class="card-title">Critical Lab Notifications</div></div>', unsafe_allow_html=True)
-
-    if critical:
-        for result in critical:
-            st.markdown(f"""
-                <div class="lab-notification">
-                    <div class="lab-icon">!</div>
-                    <div class="lab-info">
-                        <h4>{result['test_name']}: {result['result_value']} {result['unit_of_measure']}</h4>
-                        <p>Range: {result['reference_range']}</p>
-                        <p>Reported: {result['result_date']}</p>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-    else:
-        st.markdown("<p>No critical lab results.</p>", unsafe_allow_html=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # --- Full Lab Panel ---
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="card-header"><div class="card-title">Full Lab Panel</div></div>', unsafe_allow_html=True)
+        return
 
     if lab_results:
-        table_html = """
-            <table class="lab-table">
-                <thead>
-                    <tr>
-                        <th>Test</th>
-                        <th>Value</th>
-                        <th>Units</th>
-                        <th>Reference Range</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-        """
-        for r in lab_results:
-            table_html += f"""
-                <tr>
-                    <td>{r['test_name']}</td>
-                    <td>{r['result_value']}</td>
-                    <td>{r['unit_of_measure']}</td>
-                    <td>{r['reference_range']}</td>
-                    <td>{r['result_date']}</td>
-                </tr>
-            """
-        table_html += "</tbody></table>"
-        st.markdown(table_html, unsafe_allow_html=True)
+        for lab in lab_results:
+            with st.expander(f"{lab['test_name']} ({str(lab['test_date'])})"):
+                st.write(f"**Result:** {lab['result_value']} {lab['unit_of_measure']}")
+                st.write(f"**Reference Range:** {lab['reference_range']}")
+                st.write(f"**Abnormal:** {'Yes' if lab['is_abnormal'] else 'No'}")
+                st.write(f"**Notes:** {lab['lab_notes'] or 'None'}")
+                st.write(f"**Result Date:** {lab['result_date']}")
+
+                if st.button(" Mark as Reviewed", key=f"mark_reviewed_{lab['result_id']}"):
+                    try:
+                        resp = requests.put(f"{API_URL}/lab-results", json={
+                            "result_id": lab['result_id'],
+                            "is_reviewed": True
+                        })
+                        if resp.status_code == 200:
+                            st.success("Marked as reviewed")
+                            st.experimental_rerun()
+                        else:
+                            st.error("Failed to update review status")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
     else:
-        st.markdown("<p>No lab results available.</p>", unsafe_allow_html=True)
+        st.info("No lab results found.")
 
-    st.markdown("</div></div>", unsafe_allow_html=True)
+    st.markdown("##  Medication Administration Records")
 
+    try:
+        response = requests.get(f"{API_URL}/medication-administration")
+        response.raise_for_status()
+        admin_records = response.json()
+    except Exception as e:
+        st.error(f"Error loading medication administration records: {e}")
+        return
+
+    for i, med in enumerate(admin_records):
+        with st.expander(f"{med['medication_name']} - Administered on {med['administered_date']}", expanded=False):
+            st.write(f"**Dosage Form:** {med['dosage_form']}")
+            st.write(f"**Strength:** {med['strength']}")
+            st.write(f"**Related Lab Result ID:** {med['result_id']}")
+
+    st.markdown("###  Add Medication Administration Record")
+
+    with st.form("new_admin_form"):
+        medication_id = st.text_input("Medication ID", key="med_id_input")
+        result_id = st.text_input("Lab Result ID", key="lab_result_id_input")
+        administered_date = st.date_input("Administered Date", value=datetime.today(), key="admin_date_input")
+
+        submitted = st.form_submit_button("Submit Record", key="submit_admin_record")
+        if submitted:
+            data = {
+                "medication_id": medication_id,
+                "result_id": result_id,
+                "administered_date": administered_date.strftime("%Y-%m-%d")
+            }
+            try:
+                resp = requests.post(f"{API_URL}/medication-administration", json=data)
+                if resp.status_code == 200:
+                    st.success(" Administration record added!")
+                    st.experimental_rerun()
+                else:
+                    st.error(f" Failed to add record: {resp.status_code}")
+            except Exception as e:
+                st.error(f"Error: {e}")
+          
+def social_determinant_ui():
+    st.markdown("##  Social Determinants Manager")
+
+    patient_id = st.text_input("Patient ID", value="1", key="social_patient_id")
+
+    # Assign New Social Determinant
+    with st.form("assign_determinant_form"):
+        st.subheader("➕ Assign New Social Determinant")
+        determinant_id = st.text_input("Determinant ID", key="assign_determinant_id")
+        impact_level = st.selectbox("Impact Level", ["Low", "Medium", "High"], key="assign_impact_level")
+
+        assign_submitted = st.form_submit_button("Assign Determinant", key="assign_determinant_button")
+        if assign_submitted:
+            data = {
+                "patient_id": patient_id,
+                "determinant_id": determinant_id,
+                "impact_level": impact_level
+            }
+            try:
+                resp = requests.post(
+                    f"{API_URL}/patient-social-records/{patient_id}/determinant",
+                    json=data
+                )
+                if resp.status_code == 201:
+                    st.success("✅ Determinant assigned to patient!")
+                else:
+                    st.error(f"❌ Failed to assign: {resp.status_code}")
+            except Exception as e:
+                st.error(f"Error: {e}")
+
+    # Update Existing Social Determinant
+    with st.form("update_determinant_form"):
+        st.subheader(" Update Impact Level of Assigned Determinant")
+        update_determinant_id = st.text_input("Determinant ID to Update", key="update_determinant_id")
+        new_impact_level = st.selectbox("New Impact Level", ["Low", "Medium", "High"], key="update_impact_level")
+
+        update_submitted = st.form_submit_button("Update Impact Level", key="update_impact_button")
+        if update_submitted:
+            data = {"impact_level": new_impact_level}
+            try:
+                resp = requests.put(
+                    f"{API_URL}/patient-social-records/{patient_id}/determinant/{update_determinant_id}",
+                    json=data
+                )
+                if resp.status_code == 200:
+                    st.success(" Impact level updated!")
+                else:
+                    st.error(f" Update failed: {resp.status_code}")
+            except Exception as e:
+                st.error(f"Error: {e}")

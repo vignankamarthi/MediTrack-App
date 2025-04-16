@@ -60,9 +60,9 @@ with st.sidebar:
         
         
 
-    nav_button("📝 Care Task Manager", "btn_care", "care")
-    nav_button("🩺 Patient Symptom Dashboard", "btn_symptoms", "symptoms")
-    nav_button("🔬 Lab Results Viewer", "btn_lab", "lab")
+    nav_button("Care Task Manager", "btn_care", "care")
+    nav_button("Patient Symptom Dashboard", "btn_symptoms", "symptoms")
+    nav_button("Lab Results Viewer", "btn_lab", "lab")
 
     # Chooise which patient to select 
     st.markdown("### 👤 Select Patient")
@@ -71,7 +71,9 @@ with st.sidebar:
     )
 
     st.markdown('<div class="sidebar-caption">Built With Love in CS3200</div>', unsafe_allow_html=True)
-
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'pages', 'Nurse_final_implementation')))
 # Nav Page routing
 if st.session_state.selected_page == "care":
     from caretask_manager_dash_page2 import run as care_run

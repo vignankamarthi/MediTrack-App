@@ -1,19 +1,52 @@
-# caretask_manager_dash_page2.py
-
 import streamlit as st
 import requests
 
-API_URL = "http://localhost:5000"
+API_URL = "http://web-api:4000"
 
 def run():
-
-    # need import
     from layout_template import render_header
     render_header()
 
-    st.markdown("## 📝 Care Task Manager")
+    st.markdown("## Care Task Manager")
 
-    # get  care tasks from API
+    if "show_add_form" not in st.session_state:
+        st.session_state["show_add_form"] = False
+    if "task_to_edit" not in st.session_state:
+        st.session_state["task_to_edit"] = None
+    if "task_edit_desc" not in st.session_state:
+        st.session_state["task_edit_desc"] = ""
+
+    if st.button(" Add Task"):
+        st.session_state["show_add_form"] = not st.session_state["show_add_form"]
+
+    if st.session_state["show_add_form"]:
+        with st.form("add_task_form"):
+            st.subheader("Create a New Care Task")
+            task_name = st.text_input("Task Name")
+            description = st.text_area("Description")
+            priority = st.selectbox("Priority", ["low", "medium", "high"])
+            estimated_duration = st.text_input("Estimated Duration (e.g., 30 mins)")
+
+            submitted = st.form_submit_button("Submit Task")
+
+            if submitted:
+                new_task = {
+                    "task_name": task_name,
+                    "description": description,
+                    "priority": priority,
+                    "estimated_duration": estimated_duration
+                }
+                try:
+                    post_resp = requests.post(f"{API_URL}/care-tasks/", json=new_task)
+                    if post_resp.status_code == 201:
+                        st.success(" Task successfully added!")
+                        st.session_state["show_add_form"] = False
+                        st.experimental_rerun()
+                    else:
+                        st.error(f" Failed to add task: {post_resp.status_code}")
+                except Exception as e:
+                    st.error(f" Error submitting task: {e}")
+
     try:
         response = requests.get(f"{API_URL}/care-tasks")
         response.raise_for_status()
@@ -29,27 +62,7 @@ def run():
                 border-radius: 10px;
                 padding: 1rem;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                margin-bottom: 2rem;
-            }
-            .card-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid #e0e0e0;
-                margin-bottom: 1rem;
-            }
-            .card-title {
-                font-size: 20px;
-                font-weight: bold;
-                color: #003366;
-            }
-            .btn-outline {
-                padding: 0.4rem 0.8rem;
-                border: 1px solid #007bff;
-                border-radius: 6px;
-                background: white;
-                color: #007bff;
-                font-size: 14px;
+                margin-top: 1.5rem;
             }
             .task-list {
                 list-style: none;
@@ -72,15 +85,9 @@ def run():
                 border-radius: 50%;
                 margin-top: 5px;
             }
-            .urgency-high {
-                background-color: #dc3545;
-            }
-            .urgency-medium {
-                background-color: #ffc107;
-            }
-            .urgency-low {
-                background-color: #28a745;
-            }
+            .urgency-high { background-color: #dc3545; }
+            .urgency-medium { background-color: #ffc107; }
+            .urgency-low { background-color: #28a745; }
             .task-details h4 {
                 margin: 0;
                 font-size: 16px;
@@ -98,39 +105,67 @@ def run():
         </style>
     """, unsafe_allow_html=True)
 
-    # Build out care tasks cardsin HTML
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("""
-        <div class="card-header">
-            <div class="card-title">Care Tasks</div>
-            <button class="btn-outline">Add Task</button>
-        </div>
-        <div class="card-body">
-            <ul class="task-list">
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="card"><ul class="task-list">', unsafe_allow_html=True)
 
     for task in tasks:
+        task_id = task["task_id"]
+        name = task["task_name"]
+        desc = task["description"]
         priority = task.get("priority", "low").lower()
         urgency_class = f"urgency-{priority}"
+
         st.markdown(f"""
             <li class="task-item">
                 <div class="task-content">
                     <span class="urgency-indicator {urgency_class}"></span>
                     <div class="task-details">
-                        <h4>{task.get("task_name", "Unnamed Task")}</h4>
-                        <p>{task.get("description", "No description provided.")}</p>
+                        <h4>{name}</h4>
+                        <p>{desc}</p>
                     </div>
                 </div>
-                <div class="task-meta">
-                    <div class="task-assigned">Assigned to: You</div>
-                    <div class="task-due">Due: Today</div>
-                </div>
-            </li>
         """, unsafe_allow_html=True)
 
-    st.markdown("""
-            </ul>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            if st.button("🗑️ Delete", key=f"delete_{task_id}"):
+                try:
+                    del_resp = requests.delete(f"{API_URL}/care-tasks/{task_id}")
+                    if del_resp.status_code == 200:
+                        st.success(f" Task {task_id} deleted")
+                        st.experimental_rerun()
+                    else:
+                        st.error(" Failed to delete task")
+                except Exception as e:
+                    st.error(f" {e}")
 
+        with col2:
+            if st.button("✏️ Edit", key=f"edit_{task_id}"):
+                st.session_state["task_to_edit"] = task_id
+                st.session_state["task_edit_desc"] = desc
+
+        st.markdown("</li>", unsafe_allow_html=True)
+
+    st.markdown("</ul></div>", unsafe_allow_html=True)
+
+    # Edit form only shows when task_to_edit is set
+    if st.session_state.get("task_to_edit") is not None:
+        st.subheader("Edit Task Description")
+        new_desc = st.text_area(
+            "New Description",
+            value=st.session_state.get("task_edit_desc", ""),
+            key="edit_desc_input"
+        )
+        if st.button("Update Description", key="submit_edit"):
+            try:
+                put_resp = requests.put(
+                    f"{API_URL}/care-tasks/{st.session_state['task_to_edit']}/description",
+                    json={"description": new_desc}
+                )
+                if put_resp.status_code == 200:
+                    st.success("✅ Description updated.")
+                    st.session_state["task_to_edit"] = None
+                    st.experimental_rerun()
+                else:
+                    st.error(" Failed to update description.")
+            except Exception as e:
+                st.error(f"{e}")
