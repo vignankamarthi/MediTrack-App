@@ -193,6 +193,33 @@ def get_patient_pathway_records():
 
 
 # ------------------------------------------------------------
+# Return patient social determinant records [Maria-6]
+@nurses.route("/patient-social-records", methods=["GET"])
+def get_patient_social_records():
+    try:
+        current_app.logger.info("GET /patient-social-records route")
+        cursor = db.get_db().cursor()
+        cursor.execute(
+            """SELECT psr.patient_id, p.first_name, p.last_name, 
+                  psr.determinant_id, sd.determinant_name, sd.category, sd.description, 
+                  psr.impact_level
+               FROM patient_social_record psr
+               JOIN PATIENT p ON psr.patient_id = p.patient_id
+               JOIN SOCIAL_DETERMINANTS sd ON psr.determinant_id = sd.determinant_id
+               ORDER BY p.last_name, p.first_name, sd.determinant_name"""
+        )
+
+        theData = cursor.fetchall()
+
+        the_response = make_response(jsonify(theData))
+        the_response.status_code = 200
+        return the_response
+    except Exception as e:
+        current_app.logger.error(f"Route GET /patient-social-records (nurse) failed: {str(e)}")
+        return make_response(jsonify({"error": "Failed to retrieve patient social determinant records"}), 500)
+
+
+# ------------------------------------------------------------
 # Create new care task [Maria-1]
 @nurses.route("/care-tasks", methods=["POST"])
 def create_care_task():
@@ -495,6 +522,70 @@ def assign_pathway_to_patient():
 
 
 # ------------------------------------------------------------
+# Add social determinant to patient [Maria-6]
+@nurses.route("/patient-social-records", methods=["POST"])
+def add_social_determinant_to_patient():
+    try:
+        current_app.logger.info("POST /patient-social-records route")
+        cursor = db.get_db().cursor()
+
+        data = request.get_json()
+        patient_id = data.get("patient_id")
+        determinant_id = data.get("determinant_id")
+        impact_level = data.get("impact_level")
+
+        # Validate required fields
+        if not all([patient_id, determinant_id]):
+            return make_response(
+                jsonify({"error": "Missing required fields: patient_id and determinant_id are required"}),
+                400,
+            )
+
+        # Check if patient exists
+        cursor.execute(f"SELECT patient_id FROM PATIENT WHERE patient_id = {patient_id}")
+        if not cursor.fetchone():
+            return make_response(jsonify({"error": "Patient not found"}), 404)
+
+        # Check if social determinant exists
+        cursor.execute(f"SELECT determinant_id FROM SOCIAL_DETERMINANTS WHERE determinant_id = {determinant_id}")
+        if not cursor.fetchone():
+            return make_response(jsonify({"error": "Social determinant not found"}), 404)
+
+        # Check if record already exists
+        cursor.execute(
+            f"SELECT patient_id FROM patient_social_record WHERE patient_id = {patient_id} AND determinant_id = {determinant_id}"
+        )
+        if cursor.fetchone():
+            return make_response(jsonify({"error": "This social determinant is already assigned to this patient"}), 409)
+
+        insert_sql_query = """
+            INSERT INTO patient_social_record (
+                patient_id, 
+                determinant_id,
+                impact_level
+            ) VALUES (%s, %s, %s)
+        """
+
+        cursor.execute(
+            insert_sql_query,
+            (patient_id, determinant_id, impact_level),
+        )
+
+        db.get_db().commit()
+
+        the_response = make_response(
+            jsonify({"message": "Social Determinant Successfully Added to Patient"}), 
+            201
+        )
+        return the_response
+
+    except Exception as e:
+        current_app.logger.error(f"Route POST /patient-social-records (nurse) failed: {str(e)}")
+        db.get_db().rollback()
+        return make_response(jsonify({"error": "Failed to add social determinant to patient"}), 500)
+
+
+# ------------------------------------------------------------
 # Update task priority/description [Maria-1]
 @nurses.route("/care-tasks/<task_id>", methods=["PUT"])
 def update_task(task_id):
@@ -669,3 +760,54 @@ def update_lab_result_review_status():
         current_app.logger.error(f"Route PUT /lab-results (nurse) failed: {str(e)}")
         db.get_db().rollback()
         return make_response(jsonify({"error": "Failed to update lab result review status"}), 500)
+
+
+# ------------------------------------------------------------
+# Update impact level [Maria-6]
+@nurses.route("/patient-social-records", methods=["PUT"])
+def update_impact_level():
+    try:
+        current_app.logger.info("PUT /patient-social-records route")
+        cursor = db.get_db().cursor()
+
+        data = request.get_json()
+        patient_id = data.get("patient_id")
+        determinant_id = data.get("determinant_id")
+        impact_level = data.get("impact_level")
+
+        # Validate required fields
+        if not all([patient_id, determinant_id, impact_level]):
+            return make_response(
+                jsonify({"error": "Missing required fields: patient_id, determinant_id, and impact_level are required"}),
+                400,
+            )
+
+        # Check if record exists
+        cursor.execute(
+            f"""SELECT patient_id 
+                FROM patient_social_record 
+                WHERE patient_id = {patient_id} AND determinant_id = {determinant_id}"""
+        )
+        if not cursor.fetchone():
+            return make_response(jsonify({"error": "Patient social determinant record not found"}), 404)
+
+        # Execute update query
+        update_query = """
+            UPDATE patient_social_record 
+            SET impact_level = %s 
+            WHERE patient_id = %s AND determinant_id = %s
+        """
+        cursor.execute(update_query, (impact_level, patient_id, determinant_id))
+
+        db.get_db().commit()
+
+        the_response = make_response(
+            jsonify({"message": "Social Determinant Impact Level Successfully Updated"}),
+            200
+        )
+        return the_response
+
+    except Exception as e:
+        current_app.logger.error(f"Route PUT /patient-social-records (nurse) failed: {str(e)}")
+        db.get_db().rollback()
+        return make_response(jsonify({"error": "Failed to update social determinant impact level"}), 500)
