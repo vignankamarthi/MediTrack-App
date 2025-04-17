@@ -177,7 +177,8 @@ with main_col1:
         """, unsafe_allow_html=True)
     
     # View all patients button
-    st.button("View All Patients", use_container_width=True)
+    if st.button("View All Patients", use_container_width=True):
+        st.switch_page("pages/12_Patient_Care.py")
     
     # Tasks section
     st.markdown("### Today's Care Tasks")
@@ -222,10 +223,10 @@ with main_col1:
     except Exception as e:
         st.error(f"Could not load tasks data: {str(e)}")
     
-    # Links to care management pages
-    st.page_link("pages/12_Care_Tasks.py", label="Manage Care Tasks", icon="📋")
-    st.page_link("pages/13_Patient_Symptoms.py", label="View Patient Symptoms", icon="🤒")
-    st.page_link("pages/16_Care_Pathway_Management.py", label="Manage Care Pathways", icon="🛤️")
+    # Links to new consolidated pages
+    st.page_link("pages/14_Task_Management.py", label="Manage Tasks", icon="📋")
+    st.page_link("pages/12_Patient_Care.py", label="Patient Care", icon="👤")
+    st.page_link("pages/16_Documentation.py", label="Documentation", icon="📄")
 
 # Right column - Lab results and quick actions
 with main_col2:
@@ -257,21 +258,24 @@ with main_col2:
     except Exception as e:
         st.error(f"Could not load lab results: {str(e)}")
     
-    # Link to lab results page
-    st.page_link("pages/14_Lab_Results.py", label="View Lab Results", icon="🔬")
-    st.page_link("pages/15_Medication_Administration.py", label="Medication Administration", icon="💊")
+    # Links to new consolidated pages
+    st.page_link("pages/12_Patient_Care.py", label="View Lab Results", icon="🔬")
+    st.page_link("pages/13_Medication_Management.py", label="Medication Management", icon="💊")
     
     # Quick Actions
     st.markdown("### Quick Actions")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.button("Add Task", use_container_width=True)
-        st.button("Log Vital Signs", use_container_width=True)
+        if st.button("Add Task", use_container_width=True):
+            st.switch_page("pages/14_Task_Management.py")
+        if st.button("Patient Care", use_container_width=True):
+            st.switch_page("pages/12_Patient_Care.py")
     with col2:
-        st.button("Record Medication", use_container_width=True)
-        if st.button("Manage Pathways", use_container_width=True):
-            st.switch_page("pages/16_Care_Pathway_Management.py")
+        if st.button("Medication", use_container_width=True):
+            st.switch_page("pages/13_Medication_Management.py")
+        if st.button("Documentation", use_container_width=True):
+            st.switch_page("pages/16_Documentation.py")
     
     # Care pathways section
     st.markdown("### Active Care Pathways")
@@ -296,7 +300,7 @@ with main_col2:
         """, unsafe_allow_html=True)
     
     # Link to pathway management page
-    st.page_link("pages/16_Care_Pathway_Management.py", label="View All Pathways", icon="🛤️", use_container_width=True)
+    st.page_link("pages/15_Care_Pathways.py", label="Manage Care Pathways", icon="🛤️", use_container_width=True)
 
 # Footer
 st.markdown("---")

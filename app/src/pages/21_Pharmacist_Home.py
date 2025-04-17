@@ -464,7 +464,7 @@ with col2:
     st.page_link("pages/23_Prescription_Outcomes.py", label="Prescription Outcomes", icon="📋", use_container_width=True)
 
 with col3:
-    st.page_link("pages/24_Medication_Reconciliation.py", label="Medication Reconciliation", icon="✓", use_container_width=True)
+    st.page_link("pages/24_Medication_Reconciliation.py", label="Medication Reconciliation", icon="✅", use_container_width=True)
 
 with col4:
     st.page_link("pages/25_Patient_Education.py", label="Patient Education", icon="📚", use_container_width=True)
