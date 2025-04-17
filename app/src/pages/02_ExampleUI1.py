@@ -16,7 +16,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Authentication check
+# Authentication check - simplified without callbacks
 if 'is_authenticated' not in st.session_state or not st.session_state.is_authenticated:
     st.switch_page("Home.py")
 elif 'role' not in st.session_state or st.session_state.role != "physician":
