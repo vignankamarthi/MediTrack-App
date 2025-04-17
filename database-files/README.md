@@ -39,3 +39,6 @@ The database structure and sample data are designed to support all endpoints spe
 
 Video for Presentation:
 https://drive.google.com/file/d/1hFlxIFWukjAvzhw0FYzKAaQg2r5IsKKh/view?usp=share_link
+
+Video for Presenters Visual: 
+https://drive.google.com/file/d/1hFlxIFWukjAvzhw0FYzKAaQg2r5IsKKh/view?usp=share_link
