@@ -1,88 +1,153 @@
-# Spring 2025 CS 3200 Project Template Repository
+# MediTrack: Healthcare Management System
 
-# TODO: Update dependencies downloaded in venv
+MediTrack is a comprehensive patient care coordination platform designed to transform how healthcare providers collaborate and share critical information through a unified database system. This project was developed for CS 3200 - Database Design under Professor Mark Fontenot
 
+## Project Overview
 
-This repo is a template for your semester project. It includes most of the infrastructure setup (containers), sample databases, and example UI pages. Explore it fully and ask questions!
+In today's fragmented healthcare ecosystem, patient data remains isolated in separate systems, leading to potentially life-threatening delays in treatment, wasted resources through redundant testing, and compromised patient care due to information gaps. MediTrack addresses these challenges by:
 
-## Prerequisites
+- Eliminating redundant documentation
+- Reducing treatment delays caused by information access barriers
+- Preventing medication errors due to incomplete records
+- Minimizing the administrative burden on providers
 
-- A GitHub Account
-- A terminal-based git client or GUI Git client such as GitHub Desktop or the Git plugin for VSCode.
-- VSCode with the Python Plugin
-- A distribution of Python running on your laptop. The distro supported by the course is Anaconda or Miniconda.
+The platform creates a single source of truth for all providers involved in a patient's care journey, enabling data-driven healthcare decisions.
 
-## Current Project Components
+## Technology Stack
 
-Currently, there are three major components that will each run in their own Docker Containers:
+- **Frontend**: Streamlit (Python web framework)
+- **Backend**: Python Flask (API)
+- **Database**: MySQL
+- **Containerization**: Docker
+- **Development Environment**: Docker Compose
 
-- Streamlit App in the `./app` directory
-- Flask REST api in the `./api` directory
-- MySQL Database that will be initialized with SQL script files from the `./database-files` directory
+## Project Structure
 
-## Suggestion for Learning the Project Code Base
+```
+app/
+├── Dockerfile           # Docker configuration for the Streamlit app
+├── src/                 # Source code for the Streamlit application
+│   ├── Home.py          # Main entry point for the application
+│   ├── requirements.txt # Python dependencies
+│   ├── .streamlit/      # Streamlit configuration
+│   ├── modules/         # Shared code modules (navigation, etc.)
+│   ├── pages/           # Individual application pages
+│   └── static/          # Static assets (CSS, images)
+```
 
-If you are not familiar with web app development, this code base might be confusing. But don't worry, it's not that bad. Here are some suggestions for learning the code base:
+## Getting Started
 
-1. Have two versions of the template repo - one for you to individually explore and lear and another for the team's project implementation.
-1. Start by exploring the `./app` directory. This is where the Streamlit app is located. The Streamlit app is a Python-based web app that is used to interact with the user. It's a great way to build a simple web app without having to learn a lot of web development.
-1. Next, explore the `./api` directory. This is where the Flask REST API is located. The REST API is used to interact with the database and perform other server-side tasks.
-1. Finally, explore the `./database-files` directory. This is where the SQL scripts are located that will be used to initialize the MySQL database.
+### Prerequisites
 
-### Setting Up Your Personal Repo
+- Docker and Docker Compose
+- Git
 
-1. In GitHub, click the **fork** button in the upper right corner of the repo screen.
-1. When prompted, give the new repo a unique name, perhaps including your last name and the word 'personal'.
-1. Once the fork has been created, clone YOUR forked version of the repo to your computer.
-1. Set up the `.env` file in the `api` folder based on the `.env.template` file.
-1. For running the testing containers (for your personal repo), you will tell `docker compose` to use a different configuration file named `docker-compose-testing.yaml`.
-   1. `docker compose -f docker-compose-testing.yaml up -d` to start all the containers in the background
-   1. `docker compose -f docker-compose-testing.yaml down` to shutdown and delete the containers
-   1. `docker compose -f docker-compose-testing.yaml up db -d` only start the database container (replace db with api or app for the other two services as needed)
-   1. `docker compose -f docker-compose-testing.yaml stop` to "turn off" the containers but not delete them.
+### Installation and Setup
 
-### Setting Up Your Team's Repo
+1. Clone the repository:
 
-**Before you start**: As a team, one person needs to assume the role of _Team Project Repo Owner_.
+   ```bash
+   git clone https://github.com/vignankamarthi/MediTrack-App.git
+   cd MediTrack-App
+   ```
 
-1. The Team Project Repo Owner needs to fork this template repo into their own GitHub account **and give the repo a name consistent with your project's name**. If you're worried that the repo is public, don't. Every team is doing a different project.
-1. In the newly forked team repo, the Team Project Repo Owner should go to the **Settings** tab, choose **Collaborators and Teams** on the left-side panel. Add each of your team members to the repository with Write access.
+2. Start the Docker containers:
 
-**Remaining Team Members**
+   ```bash
+   docker-compose up
+   ```
 
-1. Each of the other team members will receive an invitation to join. Obviously accept the invite.
-1. Once that process is complete, each team member, including the repo owner, should clone the Team's Repo to their local machines (in a different location your Personal Project Repo).
-1. Set up the `.env` file in the `api` folder based on the `.env.template` file.
-1. For running the testing containers (for your team's repo):
-   1. `docker compose up -d` to start all the containers in the background
-   1. `docker compose down` to shutdown and delete the containers
-   1. `docker compose up db -d` only start the database container (replace db with api or app for the other two services as needed)
-   1. `docker compose stop` to "turn off" the containers but not delete them.
+3. Access the application:
+   Open your browser and navigate to `http://localhost:8501`
 
-**Note:** You can also use the Docker Desktop GUI to start and stop the containers after the first initial run.
+<br>
 
-## Handling User Role Access and Control
+4. Dependency Issues:
+   If you encounter any dependency issues, ensure you have the following packages installed in your environment:
+   
+   ```bash
+   pip install altair==5.5.0 attrs==25.3.0 blinker==1.9.0 cachetools==5.5.2 certifi==2025.1.31
+   pip install cffi==1.17.1 charset-normalizer==3.4.1 click==8.1.8 cryptography==44.0.2 Flask==3.1.0
+   pip install gitdb==4.0.12 GitPython==3.1.44 idna==3.10 isodate==0.7.2 itsdangerous==2.2.0
+   pip install Jinja2==3.1.6 jsonschema==4.23.0 jsonschema-specifications==2024.10.1 lxml==5.3.2
+   pip install MarkupSafe==3.0.2 narwhals==1.35.0 nav==5.3.1 numpy==2.2.4 packaging==24.2
+   pip install pandas==2.2.3 pillow==11.2.1 platformdirs==4.3.7 plotly==6.0.1 protobuf==5.29.4
+   pip install pyarrow==19.0.1 pycparser==2.22 pydeck==0.9.1 pyspnego==0.11.2
+   pip install python-dateutil==2.9.0.post0 python-dotenv==1.1.0 pytz==2025.2 referencing==0.36.2
+   pip install requests==2.32.3 requests-file==2.1.0 requests-toolbelt==1.0.0 requests_ntlm==1.3.0
+   pip install rpds-py==0.24.0 six==1.17.0 smmap==5.0.2 streamlit==1.44.1 tenacity==9.1.2
+   pip install toml==0.10.2 tornado==6.4.2 typing_extensions==4.13.2 tzdata==2025.2 urllib3==2.4.0
+   pip install Werkzeug==3.1.3 zeep==4.3.1
+   ```
+   
+   Alternatively, you can create a requirements.txt file with the above dependencies and install them all at once:
+   
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-In most applications, when a user logs in, they assume a particular role. For instance, when one logs in to a stock price prediction app, they may be a single investor, a portfolio manager, or a corporate executive (of a publicly traded company). Each of those _roles_ will likely present some similar features as well as some different features when compared to the other roles. So, how do you accomplish this in Streamlit? This is sometimes called Role-based Access Control, or **RBAC** for short.
+### Login Credentials
 
-The code in this project demonstrates how to implement a simple RBAC system in Streamlit but without actually using user authentication (usernames and passwords). The Streamlit pages from the original template repo are split up among 3 roles - Political Strategist, USAID Worker, and a System Administrator role (this is used for any sort of system tasks such as re-training ML model, etc.). It also demonstrates how to deploy an ML model.
+The application includes demo accounts for each user role:
 
-Wrapping your head around this will take a little time and exploration of this code base. Some highlights are below.
+- **Physician**: Dr. James Wilson
+- **Nurse**: Maria Rodriguez
+- **Pharmacist**: Sarah Chen
+- **System Administrator**: Brennan Johnson
 
-### Getting Started with the RBAC
+Select the appropriate role from the home page to log in.
 
-1. We need to turn off the standard panel of links on the left side of the Streamlit app. This is done through the `app/src/.streamlit/config.toml` file. So check that out. We are turning it off so we can control directly what links are shown.
-1. Then I created a new python module in `app/src/modules/nav.py`. When you look at the file, you will se that there are functions for basically each page of the application. The `st.sidebar.page_link(...)` adds a single link to the sidebar. We have a separate function for each page so that we can organize the links/pages by role.
-1. Next, check out the `app/src/Home.py` file. Notice that there are 3 buttons added to the page and when one is clicked, it redirects via `st.switch_page(...)` to that Roles Home page in `app/src/pages`. But before the redirect, I set a few different variables in the Streamlit `session_state` object to track role, first name of the user, and that the user is now authenticated.
-1. Notice near the top of `app/src/Home.py` and all other pages, there is a call to `SideBarLinks(...)` from the `app/src/nav.py` module. This is the function that will use the role set in `session_state` to determine what links to show the user in the sidebar.
-1. The pages are organized by Role. Pages that start with a `0` are related to the _Political Strategist_ role. Pages that start with a `1` are related to the _USAID worker_ role. And, pages that start with a `2` are related to The _System Administrator_ role.
+## User Personas
 
-## (VERY Optional) Adding an ML Model to your App
+MediTrack is designed to serve four primary user types:
 
-_Note_: This project only contains the infrastructure for a hypothetical ML model.
+1. **Physicians** (Dr. James Wilson) - Need comprehensive patient information at the point of care and tools for population health management and quality improvement.
 
-1. Build, train, and test your ML model in a Jupyter Notebook.
-1. Once you're happy with the model's performance, convert your Jupyter Notebook code for the ML model to a pure python script. You can include the `training` and `testing` functionality as well as the `prediction` functionality. You may or may not need to include data cleaning, though.
-1. Check out the `api/backend/ml_models` module. In this folder, I've put a sample (read _fake_) ML model in `model01.py`. The `predict` function will be called by the Flask REST API to perform '_real-time_' prediction based on model parameter values that are stored in the database. **Important**: you would never want to hard code the model parameter weights directly in the prediction function. tl;dr - take some time to look over the code in `model01.py`.
-1. The prediction route for the REST API is in `api/backend/customers/customer_routes.py`. Basically, it accepts two URL parameters and passes them to the `prediction` function in the `ml_models` module. The `prediction` route/function packages up the value(s) it receives from the model's `predict` function and send its back to Streamlit as JSON.
-1. Back in streamlit, check out `app/src/pages/11_Prediction.py`. Here, I create two numeric input fields. When the button is pressed, it makes a request to the REST API URL `/c/prediction/.../...` function and passes the values from the two inputs as URL parameters. It gets back the results from the route and displays them. Nothing fancy here.
+2. **Nurses** (Maria Rodriguez) - Coordinate daily patient care activities, document symptoms, administer medications, and ensure care continuity.
+
+3. **Pharmacists** (Sarah Chen) - Require complete medication histories to provide intelligent medication management, flag potential interactions, and ensure medication safety.
+
+4. **System Administrators** (Brennan Johnson) - Maintain the infrastructure, manage user access, and ensure compliance with healthcare regulations.
+
+## Features
+
+### Physician Features
+
+- **Population Health Dashboard**: Visualize treatment outcome trends across patient populations
+- **Provider Performance Comparison**: Compare provider metrics in a standardized format
+- **Treatment Outcomes Tracking**: Track effectiveness of treatments and protocols
+- **Patient Records Management**: Access and manage comprehensive patient information
+- **Clinical Protocols**: Develop and maintain evidence-based treatment guidelines
+
+### Nurse Features
+
+- **Patient Care Coordination**: View and manage patient care tasks across providers
+- **Medication Administration**: Track and document medication administration
+- **Patient Assessment**: Document symptoms and responses to treatments
+- **Care Pathways**: Create and update standardized care paths for patients
+- **Documentation**: Create and manage clinical documentation
+
+### Pharmacist Features
+
+- **Medication Review**: Review complete medication histories for potential interactions
+- **Prescription Outcomes**: Track and analyze medication effectiveness
+- **Medication Reconciliation**: Compare pre/post admission medications to prevent errors
+- **Patient Education**: Document medication counseling and education
+
+### Administrator Features
+
+- **User Management**: Control access permissions based on roles
+- **System Monitoring**: Track performance metrics and system health
+- **Audit & Compliance**: Maintain logs and ensure regulatory compliance
+- **System Settings**: Configure global application parameters
+
+## Database Design
+
+MediTrack is built on a robust relational database with:
+
+- 17 main entity tables representing core healthcare concepts
+- 25 bridge tables managing many-to-many relationships
+- Comprehensive data model supporting all user workflows
+- RESTful API architecture for secure data access
+
+This project is available for educational purposes only.
