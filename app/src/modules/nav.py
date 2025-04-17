@@ -57,9 +57,9 @@ def AdminSideBar():
     HomePageLink()
     st.sidebar.page_link("pages/31_Admin_Home.py", label="📊 Dashboard")
     st.sidebar.page_link("pages/32_Admin_Compliance.py", label="🔒 Audit & Compliance")
+    st.sidebar.page_link("pages/33_Admin_Settings.py", label="⚙️ System Settings")
     
     # Additional admin links that would link to future pages
     st.sidebar.markdown("---")
     st.sidebar.page_link("pages/31_Admin_Home.py", label="👥 User Management", help="Manage system users and permissions")
     st.sidebar.page_link("pages/31_Admin_Home.py", label="🗄️ Database Admin", help="Database management and maintenance")
-    st.sidebar.page_link("pages/31_Admin_Home.py", label="⚙️ System Settings", help="Configure system settings")
