@@ -35,7 +35,16 @@ def NurseSideBar():
     """Sidebar links for Nurse role."""
     HomePageLink()
     st.sidebar.page_link("pages/11_Nurse_Home.py", label="📊 Dashboard")
-    # Add nurse-specific links
+    
+    # Expandable section for Care Management
+    with st.sidebar.expander("🏥 Care Management", expanded=True):
+        st.page_link("pages/12_Care_Tasks.py", label="📋 Care Tasks")
+        st.page_link("pages/13_Patient_Symptoms.py", label="🤒 Patient Symptoms")
+    
+    # Expandable section for Clinical Data
+    with st.sidebar.expander("🔬 Clinical Data", expanded=True):
+        st.page_link("pages/14_Lab_Results.py", label="🧪 Lab Results")
+        st.page_link("pages/15_Medication_Administration.py", label="💊 Medication Administration")
 
 def PharmacistSideBar():
     """Sidebar links for Pharmacist role."""
