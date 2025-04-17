@@ -142,7 +142,7 @@ with col1:
 with col2:
     st.metric(label="Tasks Due Today", value="12", delta="-3 from yesterday")
 with col3:
-    st.metric(label="Critical Lab Results", value="3", delta="+1 in last hour")
+    st.metric(label="Clinical Pathways", value="5", delta="+1 new")
 
 # Layout for main content
 main_col1, main_col2 = st.columns([2, 1])
@@ -222,9 +222,10 @@ with main_col1:
     except Exception as e:
         st.error(f"Could not load tasks data: {str(e)}")
     
-    # Link to tasks page
-    st.page_link("pages/12_Care_Tasks.py", label="Manage All Tasks", icon="📋")
+    # Links to care management pages
+    st.page_link("pages/12_Care_Tasks.py", label="Manage Care Tasks", icon="📋")
     st.page_link("pages/13_Patient_Symptoms.py", label="View Patient Symptoms", icon="🤒")
+    st.page_link("pages/16_Care_Pathway_Management.py", label="Manage Care Pathways", icon="🛤️")
 
 # Right column - Lab results and quick actions
 with main_col2:
@@ -257,7 +258,8 @@ with main_col2:
         st.error(f"Could not load lab results: {str(e)}")
     
     # Link to lab results page
-    st.page_link("pages/14_Lab_Results.py", label="View All Lab Results", icon="🔬")
+    st.page_link("pages/14_Lab_Results.py", label="View Lab Results", icon="🔬")
+    st.page_link("pages/15_Medication_Administration.py", label="Medication Administration", icon="💊")
     
     # Quick Actions
     st.markdown("### Quick Actions")
@@ -268,43 +270,33 @@ with main_col2:
         st.button("Log Vital Signs", use_container_width=True)
     with col2:
         st.button("Record Medication", use_container_width=True)
-        st.button("Add Care Note", use_container_width=True)
+        if st.button("Manage Pathways", use_container_width=True):
+            st.switch_page("pages/16_Care_Pathway_Management.py")
     
-    # Recent vitals section (sample visualization)
-    st.markdown("### Latest Vitals")
+    # Care pathways section
+    st.markdown("### Active Care Pathways")
     
-    # Sample patient vitals display
-    vitals_cols = st.columns(2)
+    # Sample pathways data
+    pathways = [
+        {"patient_id": 101, "patient_name": "John Doe", "pathway_name": "Heart Failure Management", "progress": 35},
+        {"patient_id": 104, "patient_name": "Emily Davis", "pathway_name": "Asthma Control Protocol", "progress": 60},
+        {"patient_id": 108, "patient_name": "William Wilson", "pathway_name": "Diabetes Care Plan", "progress": 20}
+    ]
     
-    with vitals_cols[0]:
-        st.markdown("""
-        <div class="vital-card">
-            <div class="vital-value">98.6°F</div>
-            <div class="vital-label">TEMPERATURE</div>
+    for pathway in pathways:
+        st.markdown(f"""
+        <div style="padding: 15px; background-color: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 10px;">
+            <div style="font-weight: 600; margin-bottom: 5px;">{pathway['pathway_name']}</div>
+            <div style="font-size: 14px; color: #95aac9; margin-bottom: 8px;">Patient: {pathway['patient_name']}</div>
+            <div style="height: 8px; background-color: #edf2f9; border-radius: 4px; overflow: hidden;">
+                <div style="height: 100%; width: {pathway['progress']}%; background-color: #2c7be5;"></div>
+            </div>
+            <div style="font-size: 12px; color: #95aac9; text-align: right; margin-top: 3px;">{pathway['progress']}% complete</div>
         </div>
         """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="vital-card" style="margin-top: 10px;">
-            <div class="vital-value">120/80</div>
-            <div class="vital-label">BLOOD PRESSURE</div>
-        </div>
-        """, unsafe_allow_html=True)
     
-    with vitals_cols[1]:
-        st.markdown("""
-        <div class="vital-card">
-            <div class="vital-value">72 bpm</div>
-            <div class="vital-label">HEART RATE</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="vital-card" style="margin-top: 10px;">
-            <div class="vital-value">97%</div>
-            <div class="vital-label">O2 SATURATION</div>
-        </div>
-        """, unsafe_allow_html=True)
+    # Link to pathway management page
+    st.page_link("pages/16_Care_Pathway_Management.py", label="View All Pathways", icon="🛤️", use_container_width=True)
 
 # Footer
 st.markdown("---")

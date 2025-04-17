@@ -40,6 +40,7 @@ def NurseSideBar():
     with st.sidebar.expander("🏥 Care Management", expanded=True):
         st.page_link("pages/12_Care_Tasks.py", label="📋 Care Tasks")
         st.page_link("pages/13_Patient_Symptoms.py", label="🤒 Patient Symptoms")
+        st.page_link("pages/16_Care_Pathway_Management.py", label="🛤️ Care Pathways")
     
     # Expandable section for Clinical Data
     with st.sidebar.expander("🔬 Clinical Data", expanded=True):
