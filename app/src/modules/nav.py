@@ -24,7 +24,7 @@ def PhysicianSideBar():
     # Expandable section for Example UIs
     with st.sidebar.expander("📈 Provider Analysis", expanded=True):
         st.page_link("pages/02_ExampleUI1.py", label="Provider Comparison")
-        st.page_link("pages/03_ExampleUI2.py", label="Example UI 2")
+        st.page_link("pages/03_ExampleUI2.py", label="Population Health")
     
     # Other physician links
     st.sidebar.page_link("pages/04_Treatment_Outcomes.py", label="💊 Treatment Outcomes")
