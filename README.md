@@ -1,5 +1,38 @@
 # MediTrack: Healthcare Management System
 
+## Skills & Technologies Showcased
+
+This project demonstrates proficiency in the following areas:
+
+### Database Design & Implementation
+- **Comprehensive Relational Schema**: Designed an expansive healthcare database with 17 entity tables and 25 bridge tables that effectively model complex relationships in a healthcare setting
+- **Thorough Data Modeling**: Crafted a detailed medical data model representing interconnected healthcare workflows across physicians, nurses, pharmacists, and system administrators
+- **Normalized Database Structure**: Implemented a properly normalized database design that minimizes redundancy while preserving referential integrity
+- **Healthcare Domain Relationships**: Successfully modeled the intricate connections between patients, providers, treatments, medications, and outcomes in a cohesive structure
+- **Extensive Bridge Table Architecture**: Created a network of junction tables that maintain data consistency while allowing for sophisticated querying
+- **Healthcare-Specific Query Design**: Developed specialized queries for clinical effectiveness analysis, medication tracking, and provider performance metrics
+
+### API Development
+- **RESTful API Design**: Created a comprehensive API following REST principles with appropriate resource naming and HTTP methods
+- **Flask Framework**: Built a Python Flask backend with blueprints for modular code organization
+- **Role-Based Routes**: Implemented specialized API endpoints organized by healthcare role (physician, nurse, pharmacist, administrator)
+- **Error Handling**: Developed robust exception handling for API requests with appropriate status codes
+- **Database Connection Management**: Created efficient database connection patterns using a shared DB connection resource
+
+### System Architecture
+- **Containerization**: Implemented Docker and Docker Compose for consistent deployment across environments
+- **Microservices Design**: Separated frontend, backend API, and database into independent containerized services
+- **Environment Configuration**: Used environment variables and dotenv for secure configuration management
+- **Service Discovery**: Implemented container networking for seamless service communication
+
+### Frontend Development
+- **Streamlit Framework**: Built interactive web interfaces using Python's Streamlit library
+- **Data Visualization**: Created dynamic charts and tables for healthcare analytics
+- **Responsive Design**: Implemented mobile-friendly interfaces with custom CSS styling
+- **Form Validation**: Added input validation and error handling for data entry forms
+
+This project showcases the ability to design and implement a complete full-stack application with particular strength in healthcare database modeling and API development.
+
 MediTrack is a comprehensive patient care coordination platform designed to transform how healthcare providers collaborate and share critical information through a unified database system. This project was developed for CS 3200 - Database Design under Professor Mark Fontenot
 
 ## Project Overview
